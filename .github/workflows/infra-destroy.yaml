@@ -1,0 +1,72 @@
+name: infra-destroy
+on:
+  workflow_dispatch:
+    inputs:
+      #environment:
+       # description: 'Environment to destroy'
+       # required: true
+        #default: 'production'
+        #choices:
+         # options:
+           #- dev
+           #- stage
+           #- production
+      confirm:
+        description: 'Type DESTROY to confirm'
+        required: true
+        default: 'DESTROY'
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  TF_VERSION: "~> 1.13.0"
+  TF_PLUGIN_CACHE_DIR: ~/.terraform.d/plugin-cache
+
+defaults:
+  run:
+    working-directory: ./project-code
+
+jobs:
+  terraform-destroy:
+    if: github.event.inputs.confirm == 'DESTROY'
+    name: terraform destroy
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: aws-configure
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_APPLY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: setting up terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+
+      - name: create terraform plugin cache directory
+        run: mkdir -p ${{ env.TF_PLUGIN_CACHE_DIR }}
+
+      - name: setup cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.TF_PLUGIN_CACHE_DIR }}
+          key: terraform-plugin-${{ hashFiles('**/.terraform.lock.hcl') }}
+          restore-keys: terraform-plugin-
+
+      - name: terraform init
+        run: terraform init -input=false
+
+      - name: terraform destroy
+        run: terraform destroy -input=false -auto-approve -lock-timeout=10m
+      
+      
+
