@@ -42,7 +42,7 @@ jobs:
             console.log('OIDC audience:', payload.aud);
             console.log('Repository:', payload.repository);
             console.log('Ref:', payload.ref);
-            console.log('Event:', payload.event_name);
+            console.log('Event:', payload.event_name);git 
 
       - name: aws-configure
         uses: aws-actions/configure-aws-credentials@v4
@@ -62,8 +62,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.TF_PLUGIN_CACHE_DIR }}
-          key: terraform-plugin-${{ hashFiles('**/.terraform.lock.hcl') }}
-          restore-keys: terraform-plugin-
+          key: ${{ runner.os }}-${{ hashFiles('**/.terraform.lock.hcl') }}
+          restore-keys: ${{ runner.os }}-
 
       - name: terraform fmt
         run: terraform fmt -check -recursive
@@ -113,8 +113,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.TF_PLUGIN_CACHE_DIR }}
-          key: terraform-plugin-${{ hashFiles('**/.terraform.lock.hcl') }}
-          restore-keys: terraform-plugin-
+          key: ${{ runner.os }}-${{ hashFiles('**/.terraform.lock.hcl') }}
+          restore-keys: ${{ runner.os }}-
 
       - name: terraform fmt
         run: terraform fmt -check -recursive
