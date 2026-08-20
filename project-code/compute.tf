@@ -17,21 +17,18 @@ data "aws_ami" "ubuntu" {
 }
 
 resource "aws_instance" "main" {
-  ami                         = data.aws_ami.ubuntu.id
-  instance_type               = "t2.micro"
+  ami                         = local.ami_id.ubuntu
+  instance_type               = var.instance_type
   key_name                    = aws_key_pair.main.key_name
   vpc_security_group_ids      = [aws_security_group.main.id]
   subnet_id                   = aws_subnet.public.id
   associate_public_ip_address = true
   root_block_device {
-    volume_size           = 8
-    volume_type           = "gp3"
-    delete_on_termination = true
+    volume_size           = var.root_block_device.volume_size
+    volume_type           = var.root_block_device.volume_type
+    delete_on_termination = var.root_block_device.delete_on_termination
   }
-  tags = {
-    Name       = "ashu-instance"
-    project    = "ashu-terraform"
-    managed_by = "terraform"
-    owner      = "ashu"
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.project}-instance"
+  })
 }

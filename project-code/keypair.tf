@@ -1,10 +1,7 @@
 resource "aws_key_pair" "main" {
-  key_name   = "ashu-keypair"
-  public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIM/rbttHGXlLd9gpo5PPfoAsRbRg8/NDyFHO2YV+jqDt Ashutosh Kumar@LAPTOP-I3LN44BG"
-  tags = {
-    Name       = "ashu-keypair"
-    project    = "ashu-terraform"
-    managed_by = "terraform"
-    owner      = "ashu"
-  }
+  key_name   = var.key_pair_name
+  public_key = var.public_key
+  tags = merge(local.common_tags, {
+    Name = "${local.project}-keypair"
+  })
 }

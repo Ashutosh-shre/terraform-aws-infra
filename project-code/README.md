@@ -4,7 +4,7 @@ This project demonstrates the provisioning of AWS infrastructure using
 Terraform as Infrastructure as Code (IaC).
 
 The **v1.0.0-base** version provides a working AWS infrastructure baseline
-including networking, security, remote Terraform state management, and an
+including networking, security, remote Terraform state management, and this contains **v2.0.0-var** which added variables and locals for all hardcoded value.
 EC2 compute instance.
 
 ---
@@ -155,7 +155,8 @@ us-east-1
 ## Repository Structure
 
 ```text
-terraform-aws-infra/
+terraform-aws-infra/project-code
+
 │
 ├── versions.tf
 ├── provider.tf
@@ -168,6 +169,8 @@ terraform-aws-infra/
 ├── .gitignore
 ├── .terraform.lock.hcl
 └── README.md
+-
+
 ```
 
 ---
@@ -248,7 +251,7 @@ Review the plan and confirm the deployment when prompted.
 
 After deployment, Terraform provides information about the created
 infrastructure, including:
-
+- cicd automation
 - VPC ID
 - Public subnet ID
 - Private subnet ID
