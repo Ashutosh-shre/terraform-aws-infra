@@ -251,7 +251,7 @@ Review the plan and confirm the deployment when prompted.
 
 After deployment, Terraform provides information about the created
 infrastructure, including:
-
+- cicd automation
 - VPC ID
 - Public subnet ID
 - Private subnet ID
