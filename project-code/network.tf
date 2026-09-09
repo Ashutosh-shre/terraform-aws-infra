@@ -1,26 +1,29 @@
+
+
 resource "aws_vpc" "main" {
   cidr_block = var.vpc_cidr
   tags = merge(local.common_tags, {
     Name = "${local.project}-vpc"
   })
 
+  lifecycle {
+    precondition {
+      condition = length(local.public_subnet_indexes) >= length(local.availability_zones)
+
+      error_message = "Number of public subnets must be greater than or equal to the number of availability zones."
+    }
+  }
 }
-resource "aws_subnet" "public" {
+resource "aws_subnet" "main" {
+  count             = length(var.subnet_config)
   vpc_id            = aws_vpc.main.id
-  cidr_block        = var.subnets["public"].cidr_block
-  availability_zone = var.subnets["public"].availability_zone
+  cidr_block        = var.subnet_config[count.index].cidr_block
+  availability_zone = local.availability_zones[count.index % length(local.availability_zones)]
   tags = merge(local.common_tags, {
-    Name = "${local.project}-public-subnet"
+    Name = "${local.project}-${var.subnet_config[count.index + 1].name}"
   })
 }
-resource "aws_subnet" "private" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = var.subnets["private"].cidr_block
-  availability_zone = var.subnets["private"].availability_zone
-  tags = merge(local.common_tags, {
-    Name = "${local.project}-private-subnet"
-  })
-}
+
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
   tags = merge(local.common_tags, {
@@ -38,31 +41,40 @@ resource "aws_route_table" "public" {
   })
 }
 resource "aws_route_table_association" "public" {
-  subnet_id      = aws_subnet.public.id
+  count          = length(local.public_subnet_indexes)
+  subnet_id      = aws_subnet.main[local.public_subnet_indexes[count.index]].id
   route_table_id = aws_route_table.public.id
 }
 
 resource "aws_eip" "main" {
+  count  = length(local.public_subnet_indexes)
   domain = "vpc"
+  tags = merge(local.common_tags, {
+    Name = "${local.project}-eip-${count.index + 1}"
+  })
 }
 resource "aws_nat_gateway" "main" {
-  subnet_id     = aws_subnet.public.id
-  allocation_id = aws_eip.main.id
+  count         = length(local.availability_zones)
+  subnet_id     = aws_subnet.main[local.public_subnet_indexes[count.index]].id
+  allocation_id = aws_eip.main[count.index].id
   tags = merge(local.common_tags, {
-    Name = "${local.project}-nat-gateway"
+    Name = "${local.project}-nat-${count.index + 1}"
   })
 }
 resource "aws_route_table" "private" {
+  count  = length(local.availability_zones)
   vpc_id = aws_vpc.main.id
   route {
     cidr_block     = var.route_cidr
-    nat_gateway_id = aws_nat_gateway.main.id
+    nat_gateway_id = aws_nat_gateway.main[count.index].id
   }
   tags = merge(local.common_tags, {
-    Name = "${local.project}-private-rt"
+    Name = "${local.project}-private-rt-${count.index + 1}"
   })
 }
 resource "aws_route_table_association" "private" {
-  subnet_id      = aws_subnet.private.id
-  route_table_id = aws_route_table.private.id
+  count          = length(local.private_subnet_indexes)
+  subnet_id      = aws_subnet.main[local.private_subnet_indexes[count.index]].id
+  route_table_id = aws_route_table.private[count.index % length(local.availability_zones)].id
+
 }

@@ -11,20 +11,26 @@ variable "vpc_cidr" {
   type        = string
 }
 
-
-
-variable "subnets" {
-  description = "all public and private subnet"
-  type = map(object({
-    cidr_block        = string
-    availability_zone = string
+variable "subnet_config" {
+  description = "total subnet created by terraform"
+  type = list(object({
+    cidr_block = string
+    name       = string
+    type       = string
   }))
+
+
+
 }
+
 variable "route_cidr" {
   description = "Route table cidr block for public and private"
   type        = string
 
+
 }
+
+
 
 
 # Security group variables
@@ -59,6 +65,27 @@ variable "public_key" {
 }
 
 #compute variables
+
+variable "public_instance_count" {
+  description = "Number of instances to be in public subnet"
+  type        = number
+
+  validation {
+    condition     = var.public_instance_count >= 0
+    error_message = "Number of public instances must be greater than or equal to 1."
+  }
+
+}
+
+variable "private_instance_count" {
+  description = "Number of instances to be in private subnet"
+  type        = number
+
+  validation {
+    condition     = var.private_instance_count >= 0
+    error_message = "Number of private instances must be greater than or equal to 1."
+  }
+}
 variable "instance_type" {
   description = "Instance type of ec2"
   type        = string
