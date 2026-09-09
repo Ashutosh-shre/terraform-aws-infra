@@ -47,7 +47,7 @@ egress_rules = {
 }
 
 key_pair_name          = "ashu-keypair"
-public_key             = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIM/rbttHGXlLd9gpo5PPfoAsRbRg8/NDyFHO2YV+jqDt Ashutosh Kumar@LAPTOP-I3LN44BG"
+public_key             = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEl/Rl3wWIgvyH/1d6jRUb/OMuen8nrr2a4TRlL4TpfX Ashutosh Kumar@LAPTOP-I3LN44BG"
 public_instance_count  = 2
 private_instance_count = 2
 instance_type          = "t3.micro"
