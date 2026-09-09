@@ -3,29 +3,35 @@ output "vpc_id" {
   value       = aws_vpc.main.id
 }
 
-output "public_subnet_id" {
-  description = "The ID of the public subnet"
-  value       = aws_subnet.public.id
+output "public_subnet_ids" {
+  description = "The ID of the All public subnets"
+  value = [
+    for index in local.public_subnet_indexes : aws_subnet.main[index].id
+  ]
 }
 
-output "private_subnet_id" {
-  description = "The ID of the private subnet"
-  value       = aws_subnet.private.id
+output "private_subnet_ids" {
+  description = "The ID of the private subnets"
+  value = [
+    for index in local.private_subnet_indexes : aws_subnet.main[index].id
+  ]
 }
 
-output "instance_id" {
+output "public_instance_ids" {
   description = "The ID of the EC2 instance"
-  value       = aws_instance.main.id
+  value = [
+    for index in range(var.public_instance_count) :
+    aws_instance.main[local.public_subnet_indexes[index % length(local.public_subnet_indexes)]].id
+  ]
 }
 
-output "instance_public_ip" {
-  description = "The public IP address of the EC2 instance"
-  value       = aws_instance.main.public_ip
-}
+
 
 output "elastic_ip" {
   description = "The Elastic IP address associated with the NAT Gateway"
-  value       = aws_eip.main.public_ip
+  value = [
+    for index in range(length(local.availability_zones)) : aws_eip.main[index].public_ip
+  ]
 }
 output "internet_gateway_id" {
   description = "The ID of the Internet Gateway"
@@ -33,5 +39,8 @@ output "internet_gateway_id" {
 }
 output "nat_gateway_id" {
   description = "The ID of the NAT Gateway"
-  value       = aws_nat_gateway.main.id
+  value = [
+    for index in range(length(local.availability_zones)) : aws_nat_gateway.main[index].id
+  ]
+
 }
