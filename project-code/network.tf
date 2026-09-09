@@ -20,7 +20,7 @@ resource "aws_subnet" "main" {
   cidr_block        = var.subnet_config[count.index].cidr_block
   availability_zone = local.availability_zones[count.index % length(local.availability_zones)]
   tags = merge(local.common_tags, {
-    Name = "${local.project}-${var.subnet_config[count.index + 1].name}"
+    Name = "${local.project}-${var.subnet_config[count.index].name}"
   })
 }
 
